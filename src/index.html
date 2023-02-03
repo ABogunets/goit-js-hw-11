@@ -7,25 +7,18 @@
     <title>Homework 11</title>
   </head>
   <body>
-    <input type="text" id="search-box" />
-    <ul class="country-list">
-      <!-- <li class="item">
-        <svg class="flag" width="30" height="20">
-          <use href="./help/images/icons.svg#icon-antenna"></use>
-        </svg>
-        Botswana
-      </li> -->
-    </ul>
+    <form class="search-form" id="search-form">
+      <input
+        type="text"
+        name="searchQuery"
+        autocomplete="off"
+        placeholder="Search images..."
+      />
+      <button type="submit">Search</button>
+    </form>
 
-    <div class="country-info">
-      <!-- <h1 class="country-title">
-        <svg class="flag" width="30" height="20">
-          <use href="./help/images/icons.svg#icon-antenna"></use>
-        </svg>
-        Switzeland
-      </h1>
-      <p class="parameter"><b>Capital: </b>Bern</p>
-      <p class="parameter"><b>Capital: </b>Bern</p> -->
+    <div class="gallery">
+      <!-- Картки зображень -->
     </div>
 
     <script src="index.js" type="module"></script>
