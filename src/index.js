@@ -2,60 +2,64 @@ import './css/styles.css';
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
 import debounce from 'lodash.debounce';
 import picsTpl from './templates/pics-list.hbs';
-import API from "./fetchPics.js";
+import PicsApiService from "./pics-service.js";
 
+// let page = 1;
 
 // const DEBOUNCE_DELAY = 300;
 
 const formRef = document.querySelector(".search-form");
 const picsContainerRef = document.querySelector(".gallery");
-// const countryListRef = document.querySelector(".country-list");
+const loadBtnRef = document.querySelector(".load-more");
+
+const picsApiService = new PicsApiService();
+
 
 
 formRef.addEventListener('submit', onSearch);
+// loadBtnRef.addEventListener('click', onLoadBtnClick);
+
 
 function onSearch(e) {
   e.preventDefault();
-  
   clearPicsList();
-  API.searchOptions.q = e.currentTarget.searchQuery.value;
-  console.log('searchQuery :>> ', API.searchOptions.q);
-  API.fetchPics()
+
+  picsApiService.searchQuery = e.currentTarget.searchQuery.value.trim();
+
+  picsApiService.getPics()
     .then((pics) => {
       const picsArray = pics.hits;
-      console.log('picsArray :>> ', picsArray);
-      // const picsMarkup = pics.hits.reduce(
-      //   (markup, pic) => createMarkup(pic) + markup,
-      //   ""
-      // );
-      // console.log('picsMarkup :>> ', picsMarkup);
       renderPicsMarkup(picsArray);
     })
     .catch(onFetchError);
 }
-// function createMarkup({webformatURL}) {
-//   return `
-// <div class="photo-card">
-//   <img src=${webformatURL} alt="" loading="lazy" />
-//   <div class="info">
-//     <p class="info-item">
-//       <b>Likes</b>
-//     </p>
-//     <p class="info-item">
-//       <b>Views</b>
-//     </p>
-//     <p class="info-item">
-//       <b>Comments</b>
-//     </p>
-//     <p class="info-item">
-//       <b>Downloads</b>
-//     </p>
-//   </div>
-// </div    `;
+
+// function onLoadBtnClick(e) {
+//   API.searchOptions.page += 1;
+
+//   API.fetchPics()
+//     .then((pics) => {
+//       const picsArray = pics.hits;
+//       renderPicsMarkup(picsArray);
+//     })
+//     .catch(onFetchError);
 // }
 
 
+function renderPicsMarkup(pics) {
+  const markup = picsTpl(pics);
+    picsContainerRef.insertAdjacentHTML('beforeend', markup);
+}
 
+function clearPicsList() {
+  picsContainerRef.innerHTML = "";
+
+}
+
+function onFetchError(error) {
+  console.log('error :>> ', error);
+  Notify.failure("Sorry, there are no images matching your search query. Please try again.")
+}
 
 // function onInput(e) {
 //   clearCountryList();
@@ -78,19 +82,6 @@ function onSearch(e) {
 //     }) 
 //   .catch(onFetchError);
 // }
-function renderPicsMarkup(pics) {
-  const markup = picsTpl(pics);
-  console.log('markup :>> ', markup);
-    picsContainerRef.insertAdjacentHTML('beforeend', markup);
-}
 
 
-function clearPicsList() {
-  picsContainerRef.innerHTML = "";
 
-}
-
-function onFetchError(error) {
-  console.log('error :>> ', error);
-  Notify.failure("Sorry, there are no images matching your search query. Please try again.")
-}
