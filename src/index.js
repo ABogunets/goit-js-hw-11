@@ -2,7 +2,8 @@ import './css/styles.css';
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
 import debounce from 'lodash.debounce';
 import picsTpl from './templates/pics-list.hbs';
-import PicsApiService from "./pics-service.js";
+import PicsApiService from "./pics-api.js";
+import LoadMoreBtn from "./components/load-more-btn.js";
 
 // let page = 1;
 
@@ -10,41 +11,47 @@ import PicsApiService from "./pics-service.js";
 
 const formRef = document.querySelector(".search-form");
 const picsContainerRef = document.querySelector(".gallery");
-const loadBtnRef = document.querySelector(".load-more");
 
 const picsApiService = new PicsApiService();
+const loadMoreBtn = new LoadMoreBtn({
+  selector: ".load-more",
+  isHidden: true,
+});
 
 
 
 formRef.addEventListener('submit', onSearch);
-// loadBtnRef.addEventListener('click', onLoadBtnClick);
+loadMoreBtn.button.addEventListener('click', getPics);
 
 
 function onSearch(e) {
   e.preventDefault();
+
   clearPicsList();
+  picsApiService.query = e.currentTarget.searchQuery.value.trim();
+console.log('picsApiService.query :>> ', picsApiService.query);
+  if (picsApiService.query === '') {
+      return Notify.info("Please enter a request.")
+  };
+  
+  picsApiService.resetPage();
+  loadMoreBtn.showBtn();
+  loadMoreBtn.disableBtn();
+  getPics().finally(()=>formRef.reset());
 
-  picsApiService.searchQuery = e.currentTarget.searchQuery.value.trim();
+}
 
-  picsApiService.getPics()
+function getPics() {
+  loadMoreBtn.disableBtn();
+  return picsApiService.fetchPics()
     .then((pics) => {
-      const picsArray = pics.hits;
-      renderPicsMarkup(picsArray);
+      console.log('pics :>> ', pics);
+      if (pics.length === 0) throw new Error("No data");
+      renderPicsMarkup(pics);
+      loadMoreBtn.enableBtn();
     })
     .catch(onFetchError);
 }
-
-// function onLoadBtnClick(e) {
-//   API.searchOptions.page += 1;
-
-//   API.fetchPics()
-//     .then((pics) => {
-//       const picsArray = pics.hits;
-//       renderPicsMarkup(picsArray);
-//     })
-//     .catch(onFetchError);
-// }
-
 
 function renderPicsMarkup(pics) {
   const markup = picsTpl(pics);
