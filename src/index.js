@@ -1,13 +1,12 @@
 import './css/styles.css';
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
 import debounce from 'lodash.debounce';
+import SimpleLightbox from "simplelightbox";
+import "simplelightbox/dist/simple-lightbox.min.css";
 import picsTpl from './templates/pics-list.hbs';
 import PicsApiService from "./pics-api.js";
 import LoadMoreBtn from "./components/load-more-btn.js";
 
-// let page = 1;
-
-// const DEBOUNCE_DELAY = 300;
 
 const formRef = document.querySelector(".search-form");
 const picsContainerRef = document.querySelector(".gallery");
@@ -18,7 +17,7 @@ const loadMoreBtn = new LoadMoreBtn({
   isHidden: true,
 });
 
-
+  const gallery = new SimpleLightbox('.gallery a');
 
 formRef.addEventListener('submit', onSearch);
 loadMoreBtn.button.addEventListener('click', getPics);
@@ -37,9 +36,11 @@ console.log('picsApiService.query :>> ', picsApiService.query);
   picsApiService.resetPage();
   loadMoreBtn.showBtn();
   loadMoreBtn.disableBtn();
-  getPics().finally(()=>formRef.reset());
 
+  getPics().finally(() => formRef.reset());
+  
 }
+
 
 function getPics() {
   loadMoreBtn.disableBtn();
@@ -49,6 +50,9 @@ function getPics() {
       if (pics.length === 0) throw new Error("No data");
       renderPicsMarkup(pics);
       loadMoreBtn.enableBtn();
+
+      gallery.refresh();
+      gallery.on('show.simplelightbox');
     })
     .catch(onFetchError);
 }
@@ -60,7 +64,6 @@ function renderPicsMarkup(pics) {
 
 function clearPicsList() {
   picsContainerRef.innerHTML = "";
-
 }
 
 function onFetchError(error) {
@@ -68,27 +71,6 @@ function onFetchError(error) {
   Notify.failure("Sorry, there are no images matching your search query. Please try again.")
 }
 
-// function onInput(e) {
-//   clearCountryList();
-//   const countryName = e.target.value.trim();
-
-//   if (countryName === '') {
-//     return;
-//   }
-//   API.fetchCountries(countryName)
-//     .then(countryCards => {
-//     const numberOfCountries = countryCards.length;
-
-//     if (numberOfCountries > 10) Notify.info("Too many matches found. Please enter a more specific name.");
-//     else if (numberOfCountries >= 2 && numberOfCountries <= 10) {
-//       renderCountryList(countryCards);
-//     }
-//     else if (numberOfCountries === 1) {
-//       renderCountryInfo(countryCards);
-//     }
-//     }) 
-//   .catch(onFetchError);
-// }
 
 
 
