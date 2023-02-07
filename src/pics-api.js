@@ -13,7 +13,7 @@ export default class PicsApi {
   constructor() {
     this.searchQuery = '';
     this.queryPage = 1;
-    this.queryPerPage = 5;
+    this.queryPerPage = 20;
     this.image_type = 'photo';
     this.orientation = 'horizontal';
     this.safesearch = true;
@@ -32,9 +32,9 @@ export default class PicsApi {
         }
         return response.json();
       })
-      .then(({hits}) => {
+      .then((pics) => {
       this.incrementPage();
-      return hits;
+      return pics;
     });
   }
 
