@@ -1,6 +1,5 @@
 import './css/styles.css';
 import { Notify } from 'notiflix/build/notiflix-notify-aio';
-import debounce from 'lodash.debounce';
 import SimpleLightbox from "simplelightbox";
 import "simplelightbox/dist/simple-lightbox.min.css";
 import picsTpl from './templates/pics-list.hbs';
@@ -41,15 +40,26 @@ console.log('picsApiService.query :>> ', picsApiService.query);
   
 }
 
-
 function getPics() {
   loadMoreBtn.disableBtn();
   return picsApiService.fetchPics()
-    .then((pics) => {
-      console.log('pics :>> ', pics);
-      if (pics.length === 0) throw new Error("No data");
-      renderPicsMarkup(pics);
+    .then(({hits, totalHits}) => {
+      console.log('pics :>> ', hits, totalHits);
+            console.log('Psge:>> ', picsApiService.queryPage);
+      if (hits.length === 0 && picsApiService.queryPage <=2) throw new Error("No data");
+      if (hits.length === 0 && picsApiService.queryPage > 2) {
+        Notify.warning("We're sorry, but you've reached the end of search results.");
+        loadMoreBtn.hideBtn();
+      };
+      if (!(hits.length === 0) && picsApiService.queryPage === 2) {
+        Notify.info(`Hooray! We found ${totalHits} images.`);
+      };
+      
+      renderPicsMarkup(hits);
       loadMoreBtn.enableBtn();
+
+      if (picsApiService.queryPage > 2) scrollByOnLoadMore();
+
 
       gallery.refresh();
       gallery.on('show.simplelightbox');
@@ -69,6 +79,17 @@ function clearPicsList() {
 function onFetchError(error) {
   console.log('error :>> ', error);
   Notify.failure("Sorry, there are no images matching your search query. Please try again.")
+}
+
+function scrollByOnLoadMore() {
+  const { height: cardHeight } = document
+  .querySelector(".gallery")
+    .firstElementChild.getBoundingClientRect();
+
+  window.scrollBy({
+    top: cardHeight * 2,
+    behavior: "smooth",
+  });
 }
 
 
