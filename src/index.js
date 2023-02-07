@@ -36,35 +36,39 @@ console.log('picsApiService.query :>> ', picsApiService.query);
   loadMoreBtn.showBtn();
   loadMoreBtn.disableBtn();
 
-  getPics().finally(() => formRef.reset());
-  
+  getPics();
 }
 
-function getPics() {
+async function getPics() {
   loadMoreBtn.disableBtn();
-  return picsApiService.fetchPics()
-    .then(({hits, totalHits}) => {
-      console.log('pics :>> ', hits, totalHits);
-            console.log('Psge:>> ', picsApiService.queryPage);
-      if (hits.length === 0 && picsApiService.queryPage <=2) throw new Error("No data");
-      if (hits.length === 0 && picsApiService.queryPage > 2) {
-        Notify.warning("We're sorry, but you've reached the end of search results.");
-        loadMoreBtn.hideBtn();
-      };
-      if (!(hits.length === 0) && picsApiService.queryPage === 2) {
-        Notify.info(`Hooray! We found ${totalHits} images.`);
-      };
+  try {
+    const { hits, totalHits } = await picsApiService.fetchPics();
+    
+    console.log('pics :>> ', hits, totalHits);
+    console.log('Psge:>> ', picsApiService.queryPage);
+
+    if (hits.length === 0 && picsApiService.queryPage <= 2) throw "No data";
+    if (hits.length === 0 && picsApiService.queryPage > 2) {
+      throw "End of data";
+    };
+    if (!(hits.length === 0) && picsApiService.queryPage === 2) {
+      Notify.success(`Hooray! We found ${totalHits} images.`);
+    };
       
-      renderPicsMarkup(hits);
-      loadMoreBtn.enableBtn();
+    renderPicsMarkup(hits);
+    loadMoreBtn.enableBtn();
 
-      if (picsApiService.queryPage > 2) scrollByOnLoadMore();
+    if (picsApiService.queryPage > 2) scrollByOnLoadMore();
 
-
-      gallery.refresh();
-      gallery.on('show.simplelightbox');
-    })
-    .catch(onFetchError);
+    gallery.refresh();
+    gallery.on('show.simplelightbox');
+  }
+  catch (err) {
+    onFetchError(err);
+  }
+  finally {
+    if (picsApiService.queryPage === 2) formRef.reset();
+  }
 }
 
 function renderPicsMarkup(pics) {
@@ -78,7 +82,16 @@ function clearPicsList() {
 
 function onFetchError(error) {
   console.log('error :>> ', error);
-  Notify.failure("Sorry, there are no images matching your search query. Please try again.")
+  switch (error) { 
+    case "No data":
+      Notify.failure("Sorry, there are no images matching your search query. Please try again.");
+      loadMoreBtn.hideBtn();
+      break;
+    case "End of data":
+      Notify.failure("We're sorry, but you've reached the end of search results.");
+      loadMoreBtn.hideBtn();
+      break;
+  }
 }
 
 function scrollByOnLoadMore() {

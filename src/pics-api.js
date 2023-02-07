@@ -1,13 +1,7 @@
+import axios from "axios";
+
 const BASE_URL = "https://pixabay.com/api/";
 const API_KEY = "33341846-2d80dabb5272f7d922b758ae2";
-// const searchOptions = {
-//   key: "33341846-2d80dabb5272f7d922b758ae2",
-//   image_type: 'photo',
-//   orientation: 'horizontal',
-//   safesearch: true,
-//   page: 1,
-//   per_page: 4,
-// };
 
 export default class PicsApi {
   constructor() {
@@ -19,23 +13,14 @@ export default class PicsApi {
     this.safesearch = true;
   }
 
-  fetchPics() {
-
+  async fetchPics() {
     const url = `${BASE_URL}?key=${API_KEY}&q=${this.searchQuery}&page=${this.queryPage}
     &per_page=${this.queryPerPage}&image_type=${this.image_type}
     &orientation=${this.orientation}&safesearch=${this.safesearch}`;
-  
-    return fetch(url)
-      .then(response => {
-        if (!response.ok) {
-          throw new Error(response.status);
-        }
-        return response.json();
-      })
-      .then((pics) => {
-      this.incrementPage();
-      return pics;
-    });
+    
+    const response = await axios.get(url);
+    this.incrementPage();
+    return response.data;
   }
 
   get query() {
@@ -53,13 +38,5 @@ export default class PicsApi {
   incrementPage() {
     this.queryPage += 1;
   }
-
 }
 
-
-
-
-
-
-
-// export default { fetchPics, searchOptions };
