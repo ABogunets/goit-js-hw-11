@@ -7,7 +7,7 @@ export default class PicsApi {
   constructor() {
     this.searchQuery = '';
     this.queryPage = 1;
-    this.queryPerPage = 20;
+    this.queryPerPage = 40;
     this.image_type = 'photo';
     this.orientation = 'horizontal';
     this.safesearch = true;
