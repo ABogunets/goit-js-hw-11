@@ -14,9 +14,7 @@ export default class PicsApi {
   }
 
   async fetchPics() {
-    const url = `${BASE_URL}?key=${API_KEY}&q=${this.searchQuery}&page=${this.queryPage}
-    &per_page=${this.queryPerPage}&image_type=${this.image_type}
-    &orientation=${this.orientation}&safesearch=${this.safesearch}`;
+    const url = `${BASE_URL}?key=${API_KEY}&q=${this.searchQuery}&page=${this.queryPage}&per_page=${this.queryPerPage}&image_type=${this.image_type}&orientation=${this.orientation}&safesearch=${this.safesearch}`;
     
     const response = await axios.get(url);
     this.incrementPage();
